@@ -19,11 +19,13 @@ app.use(bodyParser.urlencoded({
 })); 
 
 const { Client } = require('whatsapp-web.js');
+const puppeteer = require("puppeteer");
+
 const client = new Client({
   restartOnAuthFail: true,
   puppeteer: {
     headless: true,
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/opt/render/.cache/puppeteer/chrome/linux-147.0.7727.57/chrome-linux64/chrome',
+    executablePath: puppeteer.executablePath(), // 🔥 auto path
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   }
 });
