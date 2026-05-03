@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "start": "node index1.js",
-    "postinstall": "node -e \"const p=require('puppeteer');\" || npx puppeteer browsers install chrome"
-  },
+ "scripts": {
+  "start": "bash start.sh",
+  "postinstall": "PUPPETEER_CACHE_DIR=/opt/render/.cache/puppeteer npx puppeteer browsers install chrome"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
