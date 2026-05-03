@@ -19,20 +19,24 @@ app.use(bodyParser.urlencoded({
 })); 
 
 const { Client } = require('whatsapp-web.js');
-const puppeteer = require("puppeteer");
+const executablePath =
+  process.env.PUPPETEER_EXECUTABLE_PATH ||
+  "/opt/render/.cache/puppeteer/chrome/linux-147.0.7727.57/chrome-linux64/chrome";
+
+console.log("Using Chrome path:", executablePath);
 
 const client = new Client({
   restartOnAuthFail: true,
   puppeteer: {
     headless: true,
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+    executablePath,
     args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage'
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage"
     ]
   }
-}); 
+});
 
 app.get('/', async (req, res) => {
     client.on('disconnected', (reason) => {
