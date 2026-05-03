@@ -25,10 +25,14 @@ const client = new Client({
   restartOnAuthFail: true,
   puppeteer: {
     headless: true,
-    executablePath: puppeteer.executablePath(), // 🔥 auto path
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath(),
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage'
+    ]
   }
-});
+}); 
 
 app.get('/', async (req, res) => {
     client.on('disconnected', (reason) => {
