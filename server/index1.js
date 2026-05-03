@@ -9,11 +9,8 @@ require('dotenv').config();
 
 var app  = express();
 
-app.use(cors());
-app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:3000',
-    credentials:true,
+  origin: "*",
 }));
 
 app.use( bodyParser.json() );       
@@ -25,10 +22,10 @@ const { Client } = require('whatsapp-web.js');
 const client = new Client({
     
     restartOnAuthFail: true, // related problem solution
-    puppeteer: {
-      headless: true,
-      args: ['--no-sandbox']
-    }
+   puppeteer: {
+  headless: true,
+  args: ['--no-sandbox', '--disable-setuid-sandbox']
+}
 });
 
 app.get('/', async (req, res) => {
