@@ -5,7 +5,7 @@ import "./Scan.css";
 const API =
   window.location.hostname === "localhost"
     ? "http://localhost:8000"
-    : "https://ping-to-mail.onrender.com";
+    : "https://ping-to-mail-backend.onrender.com";
 
 const Scan = () => {
   const [showInstructions, setShowInstructions] = useState(false);
