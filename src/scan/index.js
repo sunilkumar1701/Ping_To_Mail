@@ -1,22 +1,20 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { QRCodeCanvas } from "qrcode.react";
 import "./Scan.css";
 
-// 🔥 Dynamic API URL (IMPORTANT)
 const API =
   window.location.hostname === "localhost"
     ? "http://localhost:8000"
-    : "https://ping-to-mail.onrender.com"; // change after deploy
+    : "https://ping-to-mail.onrender.com";
 
 const Scan = () => {
   const [showInstructions, setShowInstructions] = useState(false);
   const [showTryNow, setShowTryNow] = useState(false);
-  const [url, setUrl] = useState("");
   const [needed, setNeeded] = useState({ number: "", mailid: "", password: "" });
   const [lockmsg, setLockmsg] = useState("");
   const [locked, setLocked] = useState(false);
   const [locked1, setLocked1] = useState(true);
+  const [status, setStatus] = useState("");
 
   const handleChange = (e) => {
     setNeeded({ ...needed, [e.target.name]: e.target.value });
@@ -26,16 +24,17 @@ const Scan = () => {
     setLocked(false);
     setLocked1(true);
     setLockmsg("");
+    setStatus("");
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Needed Created", needed);
 
     setLocked(true);
     setLocked1(false);
+    setStatus("⏳ Connecting to your email...");
     setLockmsg(
-      "Data locked. Click below to release it. Check WhatsApp! Every minute, mails are fetched to your WhatsApp account."
+      "✅ Running! Every 10 seconds, new emails will be forwarded to your WhatsApp."
     );
 
     const mydata = {
@@ -44,32 +43,21 @@ const Scan = () => {
       number: needed.number,
     };
 
-    (function myLoop(i) {
-      setTimeout(() => {
-        axios
-          .post(`${API}/okok`, mydata, {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
-          .then((res) => {
-            console.log("Response:", res.data);
-          })
-          .catch((err) => console.error("Error:", err));
-
-        if (--i) myLoop(i);
-      }, 60000);
-    })(5000);
-  };
-
-  const getQr = () => {
+    // Send once immediately
     axios
-      .get(`${API}/`)
-      .then((response) => {
-        setUrl(response.data);
-        console.log("QR Code:", response.data);
+      .post(`${API}/okok`, mydata, {
+        headers: { "Content-Type": "application/json" },
       })
-      .catch((err) => console.error("QR Error:", err));
+      .then((res) => {
+        console.log("Response:", res.data);
+        setStatus("✅ Connected! Watching for new emails...");
+      })
+      .catch((err) => {
+        console.error("Error:", err);
+        setStatus("❌ Error connecting. Check your email/password.");
+        setLocked(false);
+        setLocked1(true);
+      });
   };
 
   return (
@@ -90,46 +78,67 @@ const Scan = () => {
         <div className="card">
           <h2>📌 Instructions to Follow:</h2>
           <ul className="instructions-list">
-            <li>🔄 Wait for QR (first one won’t work)</li>
-            <li>📱 WhatsApp → Linked Devices → Scan QR</li>
-            <li>📧 Enable IMAP in Gmail</li>
-            <li>🔐 Use App Password</li>
-            <li>📞 Enter phone number</li>
-            <li>✉️ Enter email + app password</li>
-            <li>✅ Click Submit</li>
+            <li>📧 Enable IMAP in Gmail Settings</li>
+            <li>🔐 Generate an App Password in your Google Account</li>
+            <li>📞 Enter your WhatsApp phone number (without +91)</li>
+            <li>✉️ Enter your Gmail ID and App Password</li>
+            <li>✅ Click Send Data — new emails will arrive on WhatsApp!</li>
           </ul>
         </div>
       )}
 
       {showTryNow && (
         <div className="card">
-          <h2>Scan QR Code</h2>
-
-          <div className="qr-container">
-            <QRCodeCanvas value={url} size={200} />
-            <button className="get-qr-btn" onClick={getQr}>
-              Get QR
-            </button>
-          </div>
+          <h2>📧 Email to WhatsApp</h2>
+          <p style={{ color: "#666", marginBottom: "16px" }}>
+            New emails will be forwarded to your WhatsApp automatically.
+          </p>
 
           <form onSubmit={handleSubmit}>
-            <label>Phone Number</label>
-            <input type="tel" name="number" value={needed.number} onChange={handleChange} required />
+            <label>Phone Number (without +91)</label>
+            <input
+              type="tel"
+              name="number"
+              value={needed.number}
+              onChange={handleChange}
+              placeholder="8148487561"
+              required
+            />
 
-            <label>Email ID</label>
-            <input type="email" name="mailid" value={needed.mailid} onChange={handleChange} required />
+            <label>Gmail ID</label>
+            <input
+              type="email"
+              name="mailid"
+              value={needed.mailid}
+              onChange={handleChange}
+              placeholder="yourname@gmail.com"
+              required
+            />
 
-            <label>Password</label>
-            <input type="password" name="password" value={needed.password} onChange={handleChange} required />
+            <label>App Password</label>
+            <input
+              type="password"
+              name="password"
+              value={needed.password}
+              onChange={handleChange}
+              placeholder="16-digit app password"
+              required
+            />
 
-            <button type="submit" disabled={locked}>Send Data</button>
+            <button type="submit" disabled={locked}>
+              {locked ? "Running..." : "Send Data"}
+            </button>
           </form>
+
+          {status && (
+            <p style={{ marginTop: "12px", fontWeight: "bold" }}>{status}</p>
+          )}
 
           {lockmsg && (
             <div className="lock-msg">
               <p>{lockmsg}</p>
               <button disabled={locked1} onClick={handleUnlock}>
-                Unlock
+                Stop & Unlock
               </button>
             </div>
           )}
